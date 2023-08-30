@@ -8,3 +8,6 @@ corpus
 .vscode
 node_modules
 cache
+/cli/.z3-trace
+/cli/output/
+/cli/work_dir/

@@ -1,7 +1,10 @@
 mod evm;
 mod r#move;
 
+use crate::evm::{evm_main, EvmArgs};
+use crate::r#move::{move_main, MoveArgs};
 use clap::Parser;
+use clap::Subcommand;
 use ethers::types::Transaction;
 use hex::{decode, encode};
 use ityfuzz::evm::config::{Config, FuzzerTypes, StorageFetchingMode};
@@ -32,9 +35,6 @@ use std::collections::HashSet;
 use std::env;
 use std::rc::Rc;
 use std::str::FromStr;
-use crate::evm::{evm_main, EvmArgs};
-use crate::r#move::{move_main, MoveArgs};
-use clap::Subcommand;
 
 pub fn init_sentry() {
     let _guard = sentry::init(("https://96f3517bd77346ea835d28f956a84b9d@o4504503751344128.ingest.sentry.io/4504503752523776", sentry::ClientOptions {
@@ -61,11 +61,11 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Commands {
     EVM(EvmArgs),
-    MOVE(MoveArgs)
+    MOVE(MoveArgs),
 }
 
 fn main() {
-    init_sentry();
+    // init_sentry();
     let args = Cli::parse();
     match args.command {
         Commands::EVM(args) => {
@@ -75,5 +75,4 @@ fn main() {
             move_main(args);
         }
     }
-
 }
