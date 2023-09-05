@@ -9,7 +9,12 @@ use retry::{delay::Fixed, retry_with_index};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
+use tracing::instrument;
 
+use crate::evm::types::{EVMAddress, EVMU256};
+use revm_interpreter::analysis::to_analysed;
+use revm_primitives::bitvec::macros::internal::funty::Integral;
+use revm_primitives::{Bytecode, LatestSpec};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::cell::RefCell;
@@ -19,10 +24,6 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
-use revm_interpreter::analysis::to_analysed;
-use revm_primitives::bitvec::macros::internal::funty::Integral;
-use revm_primitives::{Bytecode, LatestSpec};
-use crate::evm::types::{EVMAddress, EVMU256};
 
 const MAX_HOPS: u32 = 2; // Assuming the value of MAX_HOPS
 
@@ -291,6 +292,7 @@ impl OnChainConfig {
         }
     }
 
+    #[instrument]
     fn get(&self, url: String) -> Option<String> {
         let mut hasher = DefaultHasher::new();
         let key = format!("post_{}", url.as_str());
@@ -407,7 +409,11 @@ impl OnChainConfig {
         self.etherscan_api_key.push(key);
     }
 
-    pub fn fetch_storage_all(&mut self, address: EVMAddress) -> Option<Arc<HashMap<String, EVMU256>>> {
+    #[instrument]
+    pub fn fetch_storage_all(
+        &mut self,
+        address: EVMAddress,
+    ) -> Option<Arc<HashMap<String, EVMU256>>> {
         if let Some(storage) = self.storage_all_cache.get(&address) {
             return storage.clone();
         } else {
@@ -417,7 +423,11 @@ impl OnChainConfig {
         }
     }
 
-    pub fn fetch_storage_all_uncached(&self, address: EVMAddress) -> Option<Arc<HashMap<String, EVMU256>>> {
+    #[instrument]
+    pub fn fetch_storage_all_uncached(
+        &self,
+        address: EVMAddress,
+    ) -> Option<Arc<HashMap<String, EVMU256>>> {
         assert_eq!(
             self.block_number, "latest",
             "fetch_full_storage only works with latest block"
@@ -470,7 +480,11 @@ impl OnChainConfig {
         return self.block_hash.as_ref().unwrap();
     }
 
-    pub fn fetch_storage_dump(&mut self, address: EVMAddress) -> Option<Arc<HashMap<EVMU256, EVMU256>>> {
+    #[instrument]
+    pub fn fetch_storage_dump(
+        &mut self,
+        address: EVMAddress,
+    ) -> Option<Arc<HashMap<EVMU256, EVMU256>>> {
         if let Some(storage) = self.storage_dump_cache.get(&address) {
             return storage.clone();
         } else {
@@ -480,6 +494,7 @@ impl OnChainConfig {
         }
     }
 
+    #[instrument]
     pub fn fetch_storage_dump_uncached(
         &mut self,
         address: EVMAddress,
@@ -520,6 +535,7 @@ impl OnChainConfig {
         }
     }
 
+    #[instrument]
     pub fn fetch_abi_uncached(&self, address: EVMAddress) -> Option<String> {
         let endpoint = format!(
             "{}?module=contract&action=getabi&address={:?}&format=json&apikey={}",
@@ -560,6 +576,7 @@ impl OnChainConfig {
         }
     }
 
+    #[instrument]
     pub fn fetch_abi(&mut self, address: EVMAddress) -> Option<String> {
         if self.abi_cache.contains_key(&address) {
             return self.abi_cache.get(&address).unwrap().clone();
@@ -569,6 +586,7 @@ impl OnChainConfig {
         abi
     }
 
+    #[instrument]
     fn _request(&self, method: String, params: String) -> Option<Value> {
         let data = format!(
             "{{\"jsonrpc\":\"2.0\", \"method\": \"{}\", \"params\": {}, \"id\": {}}}",
@@ -597,6 +615,7 @@ impl OnChainConfig {
         }
     }
 
+    #[instrument]
     fn _request_with_id(&self, method: String, params: String, id: u8) -> Option<Value> {
         let data = format!(
             "{{\"jsonrpc\":\"2.0\", \"method\": \"{}\", \"params\": {}, \"id\": {}}}",
@@ -625,6 +644,7 @@ impl OnChainConfig {
         }
     }
 
+    #[instrument]
     pub fn get_contract_code(&mut self, address: EVMAddress, force_cache: bool) -> Bytecode {
         if self.code_cache.contains_key(&address) {
             return self.code_cache[&address].clone();
@@ -660,7 +680,13 @@ impl OnChainConfig {
         return bytes;
     }
 
-    pub fn get_contract_slot(&mut self, address: EVMAddress, slot: EVMU256, force_cache: bool) -> EVMU256 {
+    #[instrument]
+    pub fn get_contract_slot(
+        &mut self,
+        address: EVMAddress,
+        slot: EVMU256,
+        force_cache: bool,
+    ) -> EVMU256 {
         if self.slot_cache.contains_key(&(address, slot)) {
             return self.slot_cache[&(address, slot)];
         }
@@ -674,6 +700,10 @@ impl OnChainConfig {
             params.push_str(&format!("\"0x{:x}\",", slot));
             params.push_str(&format!("\"{}\"", self.block_number));
             params.push_str("]");
+            println!(
+                "eth_getStorageAt {:?} {:?} {:?} ",
+                address, slot, self.block_number
+            );
             let resp = self._request("eth_getStorageAt".to_string(), params);
             match resp {
                 Some(resp) => {
@@ -695,6 +725,7 @@ impl OnChainConfig {
         return slot_value;
     }
 
+    #[instrument]
     pub fn fetch_uniswap_path(&self, token_address: EVMAddress) -> TokenContext {
         let token = format!("{:?}", token_address);
         let info: Info = self.find_path_subgraph(&self.chain_name, &token, &self.block_number);
@@ -729,10 +760,12 @@ impl OnChainConfig {
                                 initial_reserves: (
                                     EVMU256::try_from_be_slice(
                                         &hex::decode(pair.initial_reserves_0.to_string()).unwrap(),
-                                    ).unwrap(),
+                                    )
+                                    .unwrap(),
                                     EVMU256::try_from_be_slice(
                                         &hex::decode(pair.initial_reserves_1.to_string()).unwrap(),
-                                    ).unwrap(),
+                                    )
+                                    .unwrap(),
                                 ),
                             })));
                         }
@@ -755,11 +788,13 @@ impl OnChainConfig {
                                         EVMU256::try_from_be_slice(
                                             &hex::decode(pair.initial_reserves_0.to_string())
                                                 .unwrap(),
-                                        ).unwrap(),
+                                        )
+                                        .unwrap(),
                                         EVMU256::try_from_be_slice(
                                             &hex::decode(pair.initial_reserves_1.to_string())
                                                 .unwrap(),
-                                        ).unwrap(),
+                                        )
+                                        .unwrap(),
                                     ),
                                 })));
                         }
@@ -1073,7 +1108,6 @@ impl OnChainConfig {
         hops: &HashMap<String, Vec<PairData>>,
         routes: &mut Vec<Vec<PairData>>,
     ) {
-
         if pegged_tokens.values().any(|v| v == token) {
             let mut new_path = path.clone();
             new_path.push(self.get_pegged_next_hop(token, network, block));
@@ -1137,23 +1171,20 @@ impl OnChainConfig {
     }
 
     // fix get pair thegraph block sync old data
-    fn get_pair_response(&self, url: String, body: String)-> GetPairResponse
-    {
+    fn get_pair_response(&self, url: String, body: String) -> GetPairResponse {
         match self.try_get_pair(url.to_string(), body) {
             Some(v) => v,
-            __ => {
-                GetPairResponse {
-                    data: GetPairResponseData {
-                        p0: vec![],
-                        p1: vec![],
-                    },
-                }
-            }
+            __ => GetPairResponse {
+                data: GetPairResponseData {
+                    p0: vec![],
+                    p1: vec![],
+                },
+            },
         }
     }
 
-    fn try_get_pair_resut(&self, respose: &String)  -> Option<GetPairResponse>  {
-       let respose = respose.replace("\"decimals\":null", "\"decimals\":\"18\"");  // thegraph return decimals is null
+    fn try_get_pair_resut(&self, respose: &String) -> Option<GetPairResponse> {
+        let respose = respose.replace("\"decimals\":null", "\"decimals\":\"18\""); // thegraph return decimals is null
         match serde_json::from_str::<GetPairResponse>(&respose) {
             Ok(v) => return Some(v),
             Err(e) => {
@@ -1163,7 +1194,7 @@ impl OnChainConfig {
     }
 
     // try agin get thegraph pair
-    fn try_get_pair(&self, url: String, body: String)  -> Option<GetPairResponse>  {
+    fn try_get_pair(&self, url: String, body: String) -> Option<GetPairResponse> {
         let r = self.post(url.to_string(), body.clone());
         if r.is_none() {
             return None;
@@ -1181,7 +1212,7 @@ impl OnChainConfig {
         let lfind = r.find("up to block number ").unwrap();
         let rfind = r.find(" and data for block").unwrap();
         let cur_maxblock = r[lfind + 19..rfind].to_string();
-        let maxblock = format!(":{}",cur_maxblock.parse::<i32>().unwrap()-1);
+        let maxblock = format!(":{}", cur_maxblock.parse::<i32>().unwrap() - 1);
         let newbody = body.replace(&curblock, &maxblock);
         let r = self.post(url, newbody);
         if r.is_none() {
@@ -1267,8 +1298,11 @@ fn get_uniswap_api(network: &str) -> HashMap<&str, HashMap<&str, &str>> {
             api.insert("v2", v2);
         }
         _ => {
-            println!("[Flashloan] Network {} is not supported for ERC20 Flashloan", network)
-        },
+            println!(
+                "[Flashloan] Network {} is not supported for ERC20 Flashloan",
+                network
+            )
+        }
     }
 
     api
@@ -1312,8 +1346,8 @@ mod tests {
     #[test]
     fn test_fetch_abi() {
         let mut config = OnChainConfig::new(BSC, 0);
-        let v =
-            config.fetch_abi(EVMAddress::from_str("0xa0a2ee912caf7921eaabc866c6ef6fec8f7e90a4").unwrap());
+        let v = config
+            .fetch_abi(EVMAddress::from_str("0xa0a2ee912caf7921eaabc866c6ef6fec8f7e90a4").unwrap());
         println!("{:?}", v)
     }
 
