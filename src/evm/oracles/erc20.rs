@@ -12,6 +12,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
+use crate::evm::oracle::EVMBugResult;
 use crate::evm::oracles::ERC20_BUG_IDX;
 use crate::evm::producers::erc20::ERC20Producer;
 use crate::fuzzer::ORACLE_OUTPUT;
@@ -71,10 +72,18 @@ impl Oracle<EVMState, EVMAddress, Bytecode, Bytes, EVMAddress, EVMU256, Vec<u8>,
         let exec_res = &ctx.fuzz_state.get_execution_result().new_state.state;
         if exec_res.flashloan_data.earned > exec_res.flashloan_data.owed {
             unsafe {
-                ORACLE_OUTPUT += format!(
-                    "[Flashloan] Earned {} more than owed {}",
-                    exec_res.flashloan_data.earned, exec_res.flashloan_data.owed
-                ).as_str();
+                EVMBugResult::new_simple(
+                    "erc20".to_string(),
+                    ERC20_BUG_IDX,
+                    format!(
+                        "Earned {}wei more than owed {}wei",
+                        exec_res.flashloan_data.earned, exec_res.flashloan_data.owed
+                    ),
+                    ConciseEVMInput::from_input(
+                        ctx.input,
+                        ctx.fuzz_state.get_execution_result(),
+                    )
+                ).push_to_output();
             }
             vec![ERC20_BUG_IDX]
         } else {
@@ -110,9 +119,9 @@ impl Oracle<EVMState, EVMAddress, Bytecode, Bytes, EVMAddress, EVMU256, Vec<u8>,
         let mut liquidations_owed = Vec::new();
         let mut liquidations_earned = Vec::new();
 
-        for ((_, token), (prev_balance, new_balance)) in self.erc20_producer.deref().borrow().balances.iter() {
+        for ((caller, token), (prev_balance, new_balance)) in self.erc20_producer.deref().borrow().balances.iter() {
             let token_info = self.known_tokens.get(token).expect("Token not found");
-            // ctx.fuzz_state.get_execution_result_mut().new_state.state.flashloan_data.extra_info += format!("Balance: {} -> {} for {:?} @ {:?}\n", prev_balance, new_balance, caller, token).as_str();
+            // println!("Balance: {} -> {} for {:?} @ {:?}\n", prev_balance, new_balance, caller, token);
 
             if prev_balance > new_balance {
                 liquidations_owed.push((token_info, prev_balance - new_balance));
@@ -188,24 +197,28 @@ impl Oracle<EVMState, EVMAddress, Bytecode, Bytes, EVMAddress, EVMU256, Vec<u8>,
 
         if exec_res.new_state.state.flashloan_data.earned
             > exec_res.new_state.state.flashloan_data.owed
+            && exec_res.new_state.state.flashloan_data.earned - exec_res.new_state.state.flashloan_data.owed > EVMU512::from(10_000_000_000_000_000_000_000_0u128) // > 0.1ETH
         {
             let net = exec_res.new_state.state.flashloan_data.earned
                 - exec_res.new_state.state.flashloan_data.owed;
             // we scaled by 1e24, so divide by 1e24 to get ETH
             let net_eth = net / EVMU512::from(10_000_000_000_000_000_000_000_00u128);
             unsafe {
-
-
-                {
-                    ORACLE_OUTPUT += format!(
-                        "💰[Flashloan] Earned {} more than owed {}, net earned = {}wei ({}ETH), extra: {:?}\n",
+                EVMBugResult::new_simple(
+                    "erc20".to_string(),
+                    ERC20_BUG_IDX,
+                    format!(
+                        "Earned {} more than owed {}, net earned = {}wei ({}ETH)\n",
                         exec_res.new_state.state.flashloan_data.earned,
                         exec_res.new_state.state.flashloan_data.owed,
                         net,
                         net_eth,
-                        exec_res.new_state.state.flashloan_data.extra_info
-                    ).as_str();
-                }
+                    ),
+                    ConciseEVMInput::from_input(
+                        ctx.input,
+                        ctx.fuzz_state.get_execution_result(),
+                    )
+                ).push_to_output();
             }
             vec![ERC20_BUG_IDX]
         } else {
