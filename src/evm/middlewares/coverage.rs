@@ -191,6 +191,10 @@ impl CoverageReport {
                 (cov.instruction_coverage * 100) as f64 / cov.total_instructions as f64,
                 (cov.branch_coverage * 100) as f64 / cov.total_branches as f64
             );
+            info!(
+                "instructions: {}/{} branches: {}/{}",
+                cov.instruction_coverage, cov.total_instructions, cov.branch_coverage, cov.total_branches
+            );
         }
     }
 }
