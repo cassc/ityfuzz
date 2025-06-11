@@ -1,4 +1,14 @@
-use std::{cell::RefCell, collections::HashMap, fs::File, io::Read, ops::Deref, path::Path, process::exit, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    fs::File,
+    io::Read,
+    ops::Deref,
+    path::Path,
+    process::exit,
+    rc::Rc,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use bytes::Bytes;
 use glob::glob;
@@ -88,6 +98,10 @@ pub fn evm_fuzzer(
     state: &mut EVMFuzzState,
 ) {
     info!("\n\n ================ EVM Fuzzer Start ===================\n\n");
+    info!(
+        "Ityfuzz start at {}",
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
+    );
 
     // create work dir if not exists
     let _path = Path::new(config.work_dir.as_str());
