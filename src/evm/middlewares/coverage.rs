@@ -261,7 +261,7 @@ impl Coverage {
                     report.coverage.insert(
                         name.clone(),
                         CoverageResult {
-                            instruction_coverage: real_covered.len(),
+                            instruction_coverage: covered.len(),
                             total_instructions: all_pcs.len(),
                             branch_coverage: 0,
                             total_branches: 0,
