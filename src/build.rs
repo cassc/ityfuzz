@@ -1,8 +1,11 @@
 use std::process::Command;
 fn main() {
-    // taken from https://stackoverflow.com/questions/43753491/include-git-commit-hash-as-string-into-rust-program
-    let output = Command::new("git").args(["rev-parse", "HEAD"]).output().unwrap();
-    let git_hash = String::from_utf8(output.stdout).unwrap();
+    let git_hash = Command::new("git")
+        .args(["describe", "--always", "--dirty"])
+        .output()
+        .ok()
+        .and_then(|o| String::from_utf8(o.stdout).ok())
+        .unwrap_or_else(|| "unknown".into());
 
     let features = {
         let mut features = String::new();
