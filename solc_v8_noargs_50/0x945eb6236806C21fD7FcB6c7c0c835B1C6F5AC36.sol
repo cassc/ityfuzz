@@ -1,185 +1,27 @@
 /**
- *Submitted for verification at Etherscan.io on 2022-10-28
+ *Submitted for verification at Etherscan.io on 2023-02-25
 */
 
-// File: @openzeppelin/contracts/utils/Context.sol
+// File: @openzeppelin/contracts/utils/cryptography/MerkleProof.sol
 
 
-// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
-
-pragma solidity ^0.8.0;
-
-/**
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view virtual returns (bytes calldata) {
-        return msg.data;
-    }
-}
-
-// File: @openzeppelin/contracts/access/Ownable.sol
-
-
-// OpenZeppelin Contracts (last updated v4.7.0) (access/Ownable.sol)
-
-pragma solidity ^0.8.0;
-
-
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
-abstract contract Ownable is Context {
-    address private _owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor() {
-        _transferOwnership(_msgSender());
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        _checkOwner();
-        _;
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if the sender is not the owner.
-     */
-    function _checkOwner() internal view virtual {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual onlyOwner {
-        _transferOwnership(address(0));
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        _transferOwnership(newOwner);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Internal function without access restriction.
-     */
-    function _transferOwnership(address newOwner) internal virtual {
-        address oldOwner = _owner;
-        _owner = newOwner;
-        emit OwnershipTransferred(oldOwner, newOwner);
-    }
-}
-
-// File: @openzeppelin/contracts/utils/Counters.sol
-
-
-// OpenZeppelin Contracts v4.4.1 (utils/Counters.sol)
-
-pragma solidity ^0.8.0;
-
-/**
- * @title Counters
- * @author Matt Condon (@shrugs)
- * @dev Provides counters that can only be incremented, decremented or reset. This can be used e.g. to track the number
- * of elements in a mapping, issuing ERC721 ids, or counting request ids.
- *
- * Include with `using Counters for Counters.Counter;`
- */
-library Counters {
-    struct Counter {
-        // This variable should never be directly accessed by users of the library: interactions must be restricted to
-        // the library's function. As of Solidity v0.5.2, this cannot be enforced, though there is a proposal to add
-        // this feature: see https://github.com/ethereum/solidity/issues/4637
-        uint256 _value; // default: 0
-    }
-
-    function current(Counter storage counter) internal view returns (uint256) {
-        return counter._value;
-    }
-
-    function increment(Counter storage counter) internal {
-        unchecked {
-            counter._value += 1;
-        }
-    }
-
-    function decrement(Counter storage counter) internal {
-        uint256 value = counter._value;
-        require(value > 0, "Counter: decrement overflow");
-        unchecked {
-            counter._value = value - 1;
-        }
-    }
-
-    function reset(Counter storage counter) internal {
-        counter._value = 0;
-    }
-}
-
-// File: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/MerkleProof.sol
-
-
-// OpenZeppelin Contracts (last updated v4.7.0) (utils/cryptography/MerkleProof.sol)
+// OpenZeppelin Contracts (last updated v4.8.0) (utils/cryptography/MerkleProof.sol)
 
 pragma solidity ^0.8.0;
 
 /**
  * @dev These functions deal with verification of Merkle Tree proofs.
  *
- * The proofs can be generated using the JavaScript library
- * https://github.com/miguelmota/merkletreejs[merkletreejs].
- * Note: the hashing algorithm should be keccak256 and pair sorting should be enabled.
- *
- * See `test/utils/cryptography/MerkleProof.test.js` for some examples.
+ * The tree and the proofs can be generated using our
+ * https://github.com/OpenZeppelin/merkle-tree[JavaScript library].
+ * You will find a quickstart guide in the readme.
  *
  * WARNING: You should avoid using leaf values that are 64 bytes long prior to
  * hashing, or use a hash function other than keccak256 for hashing leaves.
  * This is because the concatenation of a sorted pair of internal nodes in
  * the merkle tree could be reinterpreted as a leaf value.
+ * OpenZeppelin's JavaScript library generates merkle trees that are safe
+ * against this attack out of the box.
  */
 library MerkleProof {
     /**
@@ -386,59 +228,703 @@ library MerkleProof {
     }
 }
 
+// File: @openzeppelin/contracts/utils/math/SafeMath.sol
+
+
+// OpenZeppelin Contracts (last updated v4.6.0) (utils/math/SafeMath.sol)
+
+pragma solidity ^0.8.0;
+
+// CAUTION
+// This version of SafeMath should only be used with Solidity 0.8 or later,
+// because it relies on the compiler's built in overflow checks.
+
+/**
+ * @dev Wrappers over Solidity's arithmetic operations.
+ *
+ * NOTE: `SafeMath` is generally not needed starting with Solidity 0.8, since the compiler
+ * now has built in overflow checking.
+ */
+library SafeMath {
+    /**
+     * @dev Returns the addition of two unsigned integers, with an overflow flag.
+     *
+     * _Available since v3.4._
+     */
+    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        unchecked {
+            uint256 c = a + b;
+            if (c < a) return (false, 0);
+            return (true, c);
+        }
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, with an overflow flag.
+     *
+     * _Available since v3.4._
+     */
+    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        unchecked {
+            if (b > a) return (false, 0);
+            return (true, a - b);
+        }
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
+     *
+     * _Available since v3.4._
+     */
+    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        unchecked {
+            // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+            // benefit is lost if 'b' is also tested.
+            // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+            if (a == 0) return (true, 0);
+            uint256 c = a * b;
+            if (c / a != b) return (false, 0);
+            return (true, c);
+        }
+    }
+
+    /**
+     * @dev Returns the division of two unsigned integers, with a division by zero flag.
+     *
+     * _Available since v3.4._
+     */
+    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        unchecked {
+            if (b == 0) return (false, 0);
+            return (true, a / b);
+        }
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
+     *
+     * _Available since v3.4._
+     */
+    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        unchecked {
+            if (b == 0) return (false, 0);
+            return (true, a % b);
+        }
+    }
+
+    /**
+     * @dev Returns the addition of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `+` operator.
+     *
+     * Requirements:
+     *
+     * - Addition cannot overflow.
+     */
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a + b;
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     *
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a - b;
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     *
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a * b;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers, reverting on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator.
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a / b;
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * reverting when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a % b;
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
+     * overflow (when the result is negative).
+     *
+     * CAUTION: This function is deprecated because it requires allocating memory for the error
+     * message unnecessarily. For custom revert reasons use {trySub}.
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     *
+     * - Subtraction cannot overflow.
+     */
+    function sub(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
+        unchecked {
+            require(b <= a, errorMessage);
+            return a - b;
+        }
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function div(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
+        unchecked {
+            require(b > 0, errorMessage);
+            return a / b;
+        }
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * reverting with custom message when dividing by zero.
+     *
+     * CAUTION: This function is deprecated because it requires allocating memory for the error
+     * message unnecessarily. For custom revert reasons use {tryMod}.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function mod(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
+        unchecked {
+            require(b > 0, errorMessage);
+            return a % b;
+        }
+    }
+}
+
+// File: @openzeppelin/contracts/security/ReentrancyGuard.sol
+
+
+// OpenZeppelin Contracts (last updated v4.8.0) (security/ReentrancyGuard.sol)
+
+pragma solidity ^0.8.0;
+
+/**
+ * @dev Contract module that helps prevent reentrant calls to a function.
+ *
+ * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier
+ * available, which can be applied to functions to make sure there are no nested
+ * (reentrant) calls to them.
+ *
+ * Note that because there is a single `nonReentrant` guard, functions marked as
+ * `nonReentrant` may not call one another. This can be worked around by making
+ * those functions `private`, and then adding `external` `nonReentrant` entry
+ * points to them.
+ *
+ * TIP: If you would like to learn more about reentrancy and alternative ways
+ * to protect against it, check out our blog post
+ * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].
+ */
+abstract contract ReentrancyGuard {
+    // Booleans are more expensive than uint256 or any type that takes up a full
+    // word because each write operation emits an extra SLOAD to first read the
+    // slot's contents, replace the bits taken up by the boolean, and then write
+    // back. This is the compiler's defense against contract upgrades and
+    // pointer aliasing, and it cannot be disabled.
+
+    // The values being non-zero value makes deployment a bit more expensive,
+    // but in exchange the refund on every call to nonReentrant will be lower in
+    // amount. Since refunds are capped to a percentage of the total
+    // transaction's gas, it is best to keep them low in cases like this one, to
+    // increase the likelihood of the full refund coming into effect.
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+
+    uint256 private _status;
+
+    constructor() {
+        _status = _NOT_ENTERED;
+    }
+
+    /**
+     * @dev Prevents a contract from calling itself, directly or indirectly.
+     * Calling a `nonReentrant` function from another `nonReentrant`
+     * function is not supported. It is possible to prevent this from happening
+     * by making the `nonReentrant` function external, and making it call a
+     * `private` function that does the actual work.
+     */
+    modifier nonReentrant() {
+        _nonReentrantBefore();
+        _;
+        _nonReentrantAfter();
+    }
+
+    function _nonReentrantBefore() private {
+        // On the first call to nonReentrant, _status will be _NOT_ENTERED
+        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+
+        // Any calls to nonReentrant after this point will fail
+        _status = _ENTERED;
+    }
+
+    function _nonReentrantAfter() private {
+        // By storing the original value once again, a refund is triggered (see
+        // https://eips.ethereum.org/EIPS/eip-2200)
+        _status = _NOT_ENTERED;
+    }
+}
+
+// File: @openzeppelin/contracts/utils/math/Math.sol
+
+
+// OpenZeppelin Contracts (last updated v4.8.0) (utils/math/Math.sol)
+
+pragma solidity ^0.8.0;
+
+/**
+ * @dev Standard math utilities missing in the Solidity language.
+ */
+library Math {
+    enum Rounding {
+        Down, // Toward negative infinity
+        Up, // Toward infinity
+        Zero // Toward zero
+    }
+
+    /**
+     * @dev Returns the largest of two numbers.
+     */
+    function max(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a > b ? a : b;
+    }
+
+    /**
+     * @dev Returns the smallest of two numbers.
+     */
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
+    }
+
+    /**
+     * @dev Returns the average of two numbers. The result is rounded towards
+     * zero.
+     */
+    function average(uint256 a, uint256 b) internal pure returns (uint256) {
+        // (a + b) / 2 can overflow.
+        return (a & b) + (a ^ b) / 2;
+    }
+
+    /**
+     * @dev Returns the ceiling of the division of two numbers.
+     *
+     * This differs from standard division with `/` in that it rounds up instead
+     * of rounding down.
+     */
+    function ceilDiv(uint256 a, uint256 b) internal pure returns (uint256) {
+        // (a + b - 1) / b can overflow on addition, so we distribute.
+        return a == 0 ? 0 : (a - 1) / b + 1;
+    }
+
+    /**
+     * @notice Calculates floor(x * y / denominator) with full precision. Throws if result overflows a uint256 or denominator == 0
+     * @dev Original credit to Remco Bloemen under MIT license (https://xn--2-umb.com/21/muldiv)
+     * with further edits by Uniswap Labs also under MIT license.
+     */
+    function mulDiv(
+        uint256 x,
+        uint256 y,
+        uint256 denominator
+    ) internal pure returns (uint256 result) {
+        unchecked {
+            // 512-bit multiply [prod1 prod0] = x * y. Compute the product mod 2^256 and mod 2^256 - 1, then use
+            // use the Chinese Remainder Theorem to reconstruct the 512 bit result. The result is stored in two 256
+            // variables such that product = prod1 * 2^256 + prod0.
+            uint256 prod0; // Least significant 256 bits of the product
+            uint256 prod1; // Most significant 256 bits of the product
+            assembly {
+                let mm := mulmod(x, y, not(0))
+                prod0 := mul(x, y)
+                prod1 := sub(sub(mm, prod0), lt(mm, prod0))
+            }
+
+            // Handle non-overflow cases, 256 by 256 division.
+            if (prod1 == 0) {
+                return prod0 / denominator;
+            }
+
+            // Make sure the result is less than 2^256. Also prevents denominator == 0.
+            require(denominator > prod1);
+
+            ///////////////////////////////////////////////
+            // 512 by 256 division.
+            ///////////////////////////////////////////////
+
+            // Make division exact by subtracting the remainder from [prod1 prod0].
+            uint256 remainder;
+            assembly {
+                // Compute remainder using mulmod.
+                remainder := mulmod(x, y, denominator)
+
+                // Subtract 256 bit number from 512 bit number.
+                prod1 := sub(prod1, gt(remainder, prod0))
+                prod0 := sub(prod0, remainder)
+            }
+
+            // Factor powers of two out of denominator and compute largest power of two divisor of denominator. Always >= 1.
+            // See https://cs.stackexchange.com/q/138556/92363.
+
+            // Does not overflow because the denominator cannot be zero at this stage in the function.
+            uint256 twos = denominator & (~denominator + 1);
+            assembly {
+                // Divide denominator by twos.
+                denominator := div(denominator, twos)
+
+                // Divide [prod1 prod0] by twos.
+                prod0 := div(prod0, twos)
+
+                // Flip twos such that it is 2^256 / twos. If twos is zero, then it becomes one.
+                twos := add(div(sub(0, twos), twos), 1)
+            }
+
+            // Shift in bits from prod1 into prod0.
+            prod0 |= prod1 * twos;
+
+            // Invert denominator mod 2^256. Now that denominator is an odd number, it has an inverse modulo 2^256 such
+            // that denominator * inv = 1 mod 2^256. Compute the inverse by starting with a seed that is correct for
+            // four bits. That is, denominator * inv = 1 mod 2^4.
+            uint256 inverse = (3 * denominator) ^ 2;
+
+            // Use the Newton-Raphson iteration to improve the precision. Thanks to Hensel's lifting lemma, this also works
+            // in modular arithmetic, doubling the correct bits in each step.
+            inverse *= 2 - denominator * inverse; // inverse mod 2^8
+            inverse *= 2 - denominator * inverse; // inverse mod 2^16
+            inverse *= 2 - denominator * inverse; // inverse mod 2^32
+            inverse *= 2 - denominator * inverse; // inverse mod 2^64
+            inverse *= 2 - denominator * inverse; // inverse mod 2^128
+            inverse *= 2 - denominator * inverse; // inverse mod 2^256
+
+            // Because the division is now exact we can divide by multiplying with the modular inverse of denominator.
+            // This will give us the correct result modulo 2^256. Since the preconditions guarantee that the outcome is
+            // less than 2^256, this is the final result. We don't need to compute the high bits of the result and prod1
+            // is no longer required.
+            result = prod0 * inverse;
+            return result;
+        }
+    }
+
+    /**
+     * @notice Calculates x * y / denominator with full precision, following the selected rounding direction.
+     */
+    function mulDiv(
+        uint256 x,
+        uint256 y,
+        uint256 denominator,
+        Rounding rounding
+    ) internal pure returns (uint256) {
+        uint256 result = mulDiv(x, y, denominator);
+        if (rounding == Rounding.Up && mulmod(x, y, denominator) > 0) {
+            result += 1;
+        }
+        return result;
+    }
+
+    /**
+     * @dev Returns the square root of a number. If the number is not a perfect square, the value is rounded down.
+     *
+     * Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
+     */
+    function sqrt(uint256 a) internal pure returns (uint256) {
+        if (a == 0) {
+            return 0;
+        }
+
+        // For our first guess, we get the biggest power of 2 which is smaller than the square root of the target.
+        //
+        // We know that the "msb" (most significant bit) of our target number `a` is a power of 2 such that we have
+        // `msb(a) <= a < 2*msb(a)`. This value can be written `msb(a)=2**k` with `k=log2(a)`.
+        //
+        // This can be rewritten `2**log2(a) <= a < 2**(log2(a) + 1)`
+        // → `sqrt(2**k) <= sqrt(a) < sqrt(2**(k+1))`
+        // → `2**(k/2) <= sqrt(a) < 2**((k+1)/2) <= 2**(k/2 + 1)`
+        //
+        // Consequently, `2**(log2(a) / 2)` is a good first approximation of `sqrt(a)` with at least 1 correct bit.
+        uint256 result = 1 << (log2(a) >> 1);
+
+        // At this point `result` is an estimation with one bit of precision. We know the true value is a uint128,
+        // since it is the square root of a uint256. Newton's method converges quadratically (precision doubles at
+        // every iteration). We thus need at most 7 iteration to turn our partial result with one bit of precision
+        // into the expected uint128 result.
+        unchecked {
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            return min(result, a / result);
+        }
+    }
+
+    /**
+     * @notice Calculates sqrt(a), following the selected rounding direction.
+     */
+    function sqrt(uint256 a, Rounding rounding) internal pure returns (uint256) {
+        unchecked {
+            uint256 result = sqrt(a);
+            return result + (rounding == Rounding.Up && result * result < a ? 1 : 0);
+        }
+    }
+
+    /**
+     * @dev Return the log in base 2, rounded down, of a positive value.
+     * Returns 0 if given 0.
+     */
+    function log2(uint256 value) internal pure returns (uint256) {
+        uint256 result = 0;
+        unchecked {
+            if (value >> 128 > 0) {
+                value >>= 128;
+                result += 128;
+            }
+            if (value >> 64 > 0) {
+                value >>= 64;
+                result += 64;
+            }
+            if (value >> 32 > 0) {
+                value >>= 32;
+                result += 32;
+            }
+            if (value >> 16 > 0) {
+                value >>= 16;
+                result += 16;
+            }
+            if (value >> 8 > 0) {
+                value >>= 8;
+                result += 8;
+            }
+            if (value >> 4 > 0) {
+                value >>= 4;
+                result += 4;
+            }
+            if (value >> 2 > 0) {
+                value >>= 2;
+                result += 2;
+            }
+            if (value >> 1 > 0) {
+                result += 1;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @dev Return the log in base 2, following the selected rounding direction, of a positive value.
+     * Returns 0 if given 0.
+     */
+    function log2(uint256 value, Rounding rounding) internal pure returns (uint256) {
+        unchecked {
+            uint256 result = log2(value);
+            return result + (rounding == Rounding.Up && 1 << result < value ? 1 : 0);
+        }
+    }
+
+    /**
+     * @dev Return the log in base 10, rounded down, of a positive value.
+     * Returns 0 if given 0.
+     */
+    function log10(uint256 value) internal pure returns (uint256) {
+        uint256 result = 0;
+        unchecked {
+            if (value >= 10**64) {
+                value /= 10**64;
+                result += 64;
+            }
+            if (value >= 10**32) {
+                value /= 10**32;
+                result += 32;
+            }
+            if (value >= 10**16) {
+                value /= 10**16;
+                result += 16;
+            }
+            if (value >= 10**8) {
+                value /= 10**8;
+                result += 8;
+            }
+            if (value >= 10**4) {
+                value /= 10**4;
+                result += 4;
+            }
+            if (value >= 10**2) {
+                value /= 10**2;
+                result += 2;
+            }
+            if (value >= 10**1) {
+                result += 1;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @dev Return the log in base 10, following the selected rounding direction, of a positive value.
+     * Returns 0 if given 0.
+     */
+    function log10(uint256 value, Rounding rounding) internal pure returns (uint256) {
+        unchecked {
+            uint256 result = log10(value);
+            return result + (rounding == Rounding.Up && 10**result < value ? 1 : 0);
+        }
+    }
+
+    /**
+     * @dev Return the log in base 256, rounded down, of a positive value.
+     * Returns 0 if given 0.
+     *
+     * Adding one to the result gives the number of pairs of hex symbols needed to represent `value` as a hex string.
+     */
+    function log256(uint256 value) internal pure returns (uint256) {
+        uint256 result = 0;
+        unchecked {
+            if (value >> 128 > 0) {
+                value >>= 128;
+                result += 16;
+            }
+            if (value >> 64 > 0) {
+                value >>= 64;
+                result += 8;
+            }
+            if (value >> 32 > 0) {
+                value >>= 32;
+                result += 4;
+            }
+            if (value >> 16 > 0) {
+                value >>= 16;
+                result += 2;
+            }
+            if (value >> 8 > 0) {
+                result += 1;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @dev Return the log in base 10, following the selected rounding direction, of a positive value.
+     * Returns 0 if given 0.
+     */
+    function log256(uint256 value, Rounding rounding) internal pure returns (uint256) {
+        unchecked {
+            uint256 result = log256(value);
+            return result + (rounding == Rounding.Up && 1 << (result * 8) < value ? 1 : 0);
+        }
+    }
+}
+
 // File: @openzeppelin/contracts/utils/Strings.sol
 
 
-// OpenZeppelin Contracts (last updated v4.7.0) (utils/Strings.sol)
+// OpenZeppelin Contracts (last updated v4.8.0) (utils/Strings.sol)
 
 pragma solidity ^0.8.0;
+
 
 /**
  * @dev String operations.
  */
 library Strings {
-    bytes16 private constant _HEX_SYMBOLS = "0123456789abcdef";
+    bytes16 private constant _SYMBOLS = "0123456789abcdef";
     uint8 private constant _ADDRESS_LENGTH = 20;
 
     /**
      * @dev Converts a `uint256` to its ASCII `string` decimal representation.
      */
     function toString(uint256 value) internal pure returns (string memory) {
-        // Inspired by OraclizeAPI's implementation - MIT licence
-        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-
-        if (value == 0) {
-            return "0";
+        unchecked {
+            uint256 length = Math.log10(value) + 1;
+            string memory buffer = new string(length);
+            uint256 ptr;
+            /// @solidity memory-safe-assembly
+            assembly {
+                ptr := add(buffer, add(32, length))
+            }
+            while (true) {
+                ptr--;
+                /// @solidity memory-safe-assembly
+                assembly {
+                    mstore8(ptr, byte(mod(value, 10), _SYMBOLS))
+                }
+                value /= 10;
+                if (value == 0) break;
+            }
+            return buffer;
         }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
     }
 
     /**
      * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.
      */
     function toHexString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0x00";
+        unchecked {
+            return toHexString(value, Math.log256(value) + 1);
         }
-        uint256 temp = value;
-        uint256 length = 0;
-        while (temp != 0) {
-            length++;
-            temp >>= 8;
-        }
-        return toHexString(value, length);
     }
 
     /**
@@ -449,7 +935,7 @@ library Strings {
         buffer[0] = "0";
         buffer[1] = "x";
         for (uint256 i = 2 * length + 1; i > 1; --i) {
-            buffer[i] = _HEX_SYMBOLS[value & 0xf];
+            buffer[i] = _SYMBOLS[value & 0xf];
             value >>= 4;
         }
         require(value == 0, "Strings: hex length insufficient");
@@ -464,10 +950,10 @@ library Strings {
     }
 }
 
-// File: https://github.com/chiru-labs/ERC721A/blob/main/contracts/IERC721A.sol
+// File: erc721a/contracts/IERC721A.sol
 
 
-// ERC721A Contracts v4.2.0
+// ERC721A Contracts v4.2.3
 // Creator: Chiru Labs
 
 pragma solidity ^0.8.4;
@@ -485,11 +971,6 @@ interface IERC721A {
      * The token does not exist.
      */
     error ApprovalQueryForNonexistentToken();
-
-    /**
-     * The caller cannot approve to their own address.
-     */
-    error ApproveToCaller();
 
     /**
      * Cannot query the balance for the zero address.
@@ -643,7 +1124,7 @@ interface IERC721A {
         address to,
         uint256 tokenId,
         bytes calldata data
-    ) external;
+    ) external payable;
 
     /**
      * @dev Equivalent to `safeTransferFrom(from, to, tokenId, '')`.
@@ -652,7 +1133,7 @@ interface IERC721A {
         address from,
         address to,
         uint256 tokenId
-    ) external;
+    ) external payable;
 
     /**
      * @dev Transfers `tokenId` from `from` to `to`.
@@ -674,7 +1155,7 @@ interface IERC721A {
         address from,
         address to,
         uint256 tokenId
-    ) external;
+    ) external payable;
 
     /**
      * @dev Gives permission to `to` to transfer `tokenId` token to another account.
@@ -690,7 +1171,7 @@ interface IERC721A {
      *
      * Emits an {Approval} event.
      */
-    function approve(address to, uint256 tokenId) external;
+    function approve(address to, uint256 tokenId) external payable;
 
     /**
      * @dev Approve or remove `operator` as an operator for the caller.
@@ -754,10 +1235,10 @@ interface IERC721A {
     event ConsecutiveTransfer(uint256 indexed fromTokenId, uint256 toTokenId, address indexed from, address indexed to);
 }
 
-// File: https://github.com/chiru-labs/ERC721A/blob/main/contracts/ERC721A.sol
+// File: erc721a/contracts/ERC721A.sol
 
 
-// ERC721A Contracts v4.2.0
+// ERC721A Contracts v4.2.3
 // Creator: Chiru Labs
 
 pragma solidity ^0.8.4;
@@ -791,7 +1272,7 @@ interface ERC721A__IERC721Receiver {
  * - The maximum token ID cannot exceed 2**256 - 1 (max value of uint256).
  */
 contract ERC721A is IERC721A {
-    // Reference type for token approval.
+    // Bypass for a `--via-ir` bug (https://github.com/chiru-labs/ERC721A/pull/364).
     struct TokenApprovalRef {
         address value;
     }
@@ -1179,7 +1660,7 @@ contract ERC721A is IERC721A {
      *
      * Emits an {Approval} event.
      */
-    function approve(address to, uint256 tokenId) public virtual override {
+    function approve(address to, uint256 tokenId) public payable virtual override {
         address owner = ownerOf(tokenId);
 
         if (_msgSenderERC721A() != owner)
@@ -1216,8 +1697,6 @@ contract ERC721A is IERC721A {
      * Emits an {ApprovalForAll} event.
      */
     function setApprovalForAll(address operator, bool approved) public virtual override {
-        if (operator == _msgSenderERC721A()) revert ApproveToCaller();
-
         _operatorApprovals[_msgSenderERC721A()][operator] = approved;
         emit ApprovalForAll(_msgSenderERC721A(), operator, approved);
     }
@@ -1272,7 +1751,7 @@ contract ERC721A is IERC721A {
         returns (uint256 approvedAddressSlot, address approvedAddress)
     {
         TokenApprovalRef storage tokenApproval = _tokenApprovals[tokenId];
-        // The following is equivalent to `approvedAddress = _tokenApprovals[tokenId]`.
+        // The following is equivalent to `approvedAddress = _tokenApprovals[tokenId].value`.
         assembly {
             approvedAddressSlot := tokenApproval.slot
             approvedAddress := sload(approvedAddressSlot)
@@ -1300,7 +1779,7 @@ contract ERC721A is IERC721A {
         address from,
         address to,
         uint256 tokenId
-    ) public virtual override {
+    ) public payable virtual override {
         uint256 prevOwnershipPacked = _packedOwnershipOf(tokenId);
 
         if (address(uint160(prevOwnershipPacked)) != from) revert TransferFromIncorrectOwner();
@@ -1366,7 +1845,7 @@ contract ERC721A is IERC721A {
         address from,
         address to,
         uint256 tokenId
-    ) public virtual override {
+    ) public payable virtual override {
         safeTransferFrom(from, to, tokenId, '');
     }
 
@@ -1390,7 +1869,7 @@ contract ERC721A is IERC721A {
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) public virtual override {
+    ) public payable virtual override {
         transferFrom(from, to, tokenId);
         if (to.code.length != 0)
             if (!_checkContractOnERC721Received(from, to, tokenId, _data)) {
@@ -1520,6 +1999,9 @@ contract ERC721A is IERC721A {
             uint256 end = startTokenId + quantity;
 
             // Use assembly to loop and emit the `Transfer` event for gas savings.
+            // The duplicated `log4` removes an extra check and reduces stack juggling.
+            // The assembly, together with the surrounding Solidity code, have been
+            // delicately arranged to nudge the compiler into producing optimized opcodes.
             assembly {
                 // Mask `to` to the lower 160 bits, in case the upper bits somehow aren't clean.
                 toMasked := and(to, _BITMASK_ADDRESS)
@@ -1533,6 +2015,9 @@ contract ERC721A is IERC721A {
                     startTokenId // `tokenId`.
                 )
 
+                // The `iszero(eq(,))` check ensures that large values of `quantity`
+                // that overflows uint256 will make the loop run out of gas.
+                // The compiler will optimize the `iszero` away for performance.
                 for {
                     let tokenId := add(startTokenId, 1)
                 } iszero(eq(tokenId, end)) {
@@ -1805,13 +2290,17 @@ contract ERC721A is IERC721A {
      */
     function _toString(uint256 value) internal pure virtual returns (string memory str) {
         assembly {
-            // The maximum value of a uint256 contains 78 digits (1 byte per digit),
-            // but we allocate 0x80 bytes to keep the free memory pointer 32-byte word aliged.
-            // We will need 1 32-byte word to store the length,
-            // and 3 32-byte words to store a maximum of 78 digits. Total: 0x20 + 3 * 0x20 = 0x80.
-            str := add(mload(0x40), 0x80)
+            // The maximum value of a uint256 contains 78 digits (1 byte per digit), but
+            // we allocate 0xa0 bytes to keep the free memory pointer 32-byte word aligned.
+            // We will need 1 word for the trailing zeros padding, 1 word for the length,
+            // and 3 words for a maximum of 78 digits. Total: 5 * 0x20 = 0xa0.
+            let m := add(mload(0x40), 0xa0)
             // Update the free memory pointer to allocate.
-            mstore(0x40, str)
+            mstore(0x40, m)
+            // Assign the `str` to the end.
+            str := sub(m, 0x20)
+            // Zeroize the slot after the string.
+            mstore(str, 0)
 
             // Cache the end of the memory to calculate the length later.
             let end := str
@@ -1839,580 +2328,264 @@ contract ERC721A is IERC721A {
     }
 }
 
-// File: https://github.com/chiru-labs/ERC721A/blob/main/contracts/extensions/IERC721AQueryable.sol
+// File: @openzeppelin/contracts/utils/Context.sol
 
 
-// ERC721A Contracts v4.2.0
-// Creator: Chiru Labs
+// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
 
-pragma solidity ^0.8.4;
-
+pragma solidity ^0.8.0;
 
 /**
- * @dev Interface of ERC721AQueryable.
- */
-interface IERC721AQueryable is IERC721A {
-    /**
-     * Invalid query range (`start` >= `stop`).
-     */
-    error InvalidQueryRange();
-
-    /**
-     * @dev Returns the `TokenOwnership` struct at `tokenId` without reverting.
-     *
-     * If the `tokenId` is out of bounds:
-     *
-     * - `addr = address(0)`
-     * - `startTimestamp = 0`
-     * - `burned = false`
-     * - `extraData = 0`
-     *
-     * If the `tokenId` is burned:
-     *
-     * - `addr = <Address of owner before token was burned>`
-     * - `startTimestamp = <Timestamp when token was burned>`
-     * - `burned = true`
-     * - `extraData = <Extra data when token was burned>`
-     *
-     * Otherwise:
-     *
-     * - `addr = <Address of owner>`
-     * - `startTimestamp = <Timestamp of start of ownership>`
-     * - `burned = false`
-     * - `extraData = <Extra data at start of ownership>`
-     */
-    function explicitOwnershipOf(uint256 tokenId) external view returns (TokenOwnership memory);
-
-    /**
-     * @dev Returns an array of `TokenOwnership` structs at `tokenIds` in order.
-     * See {ERC721AQueryable-explicitOwnershipOf}
-     */
-    function explicitOwnershipsOf(uint256[] memory tokenIds) external view returns (TokenOwnership[] memory);
-
-    /**
-     * @dev Returns an array of token IDs owned by `owner`,
-     * in the range [`start`, `stop`)
-     * (i.e. `start <= tokenId < stop`).
-     *
-     * This function allows for tokens to be queried if the collection
-     * grows too big for a single call of {ERC721AQueryable-tokensOfOwner}.
-     *
-     * Requirements:
-     *
-     * - `start < stop`
-     */
-    function tokensOfOwnerIn(
-        address owner,
-        uint256 start,
-        uint256 stop
-    ) external view returns (uint256[] memory);
-
-    /**
-     * @dev Returns an array of token IDs owned by `owner`.
-     *
-     * This function scans the ownership mapping and is O(`totalSupply`) in complexity.
-     * It is meant to be called off-chain.
-     *
-     * See {ERC721AQueryable-tokensOfOwnerIn} for splitting the scan into
-     * multiple smaller scans if the collection is large enough to cause
-     * an out-of-gas error (10K collections should be fine).
-     */
-    function tokensOfOwner(address owner) external view returns (uint256[] memory);
-}
-
-// File: https://github.com/chiru-labs/ERC721A/blob/main/contracts/extensions/ERC721AQueryable.sol
-
-
-// ERC721A Contracts v4.2.0
-// Creator: Chiru Labs
-
-pragma solidity ^0.8.4;
-
-
-
-/**
- * @title ERC721AQueryable.
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
  *
- * @dev ERC721A subclass with convenience query functions.
+ * This contract is only required for intermediate, library-like contracts.
  */
-abstract contract ERC721AQueryable is ERC721A, IERC721AQueryable {
-    /**
-     * @dev Returns the `TokenOwnership` struct at `tokenId` without reverting.
-     *
-     * If the `tokenId` is out of bounds:
-     *
-     * - `addr = address(0)`
-     * - `startTimestamp = 0`
-     * - `burned = false`
-     * - `extraData = 0`
-     *
-     * If the `tokenId` is burned:
-     *
-     * - `addr = <Address of owner before token was burned>`
-     * - `startTimestamp = <Timestamp when token was burned>`
-     * - `burned = true`
-     * - `extraData = <Extra data when token was burned>`
-     *
-     * Otherwise:
-     *
-     * - `addr = <Address of owner>`
-     * - `startTimestamp = <Timestamp of start of ownership>`
-     * - `burned = false`
-     * - `extraData = <Extra data at start of ownership>`
-     */
-    function explicitOwnershipOf(uint256 tokenId) public view virtual override returns (TokenOwnership memory) {
-        TokenOwnership memory ownership;
-        if (tokenId < _startTokenId() || tokenId >= _nextTokenId()) {
-            return ownership;
-        }
-        ownership = _ownershipAt(tokenId);
-        if (ownership.burned) {
-            return ownership;
-        }
-        return _ownershipOf(tokenId);
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address) {
+        return msg.sender;
     }
 
-    /**
-     * @dev Returns an array of `TokenOwnership` structs at `tokenIds` in order.
-     * See {ERC721AQueryable-explicitOwnershipOf}
-     */
-    function explicitOwnershipsOf(uint256[] calldata tokenIds)
-        external
-        view
-        virtual
-        override
-        returns (TokenOwnership[] memory)
-    {
-        unchecked {
-            uint256 tokenIdsLength = tokenIds.length;
-            TokenOwnership[] memory ownerships = new TokenOwnership[](tokenIdsLength);
-            for (uint256 i; i != tokenIdsLength; ++i) {
-                ownerships[i] = explicitOwnershipOf(tokenIds[i]);
-            }
-            return ownerships;
-        }
-    }
-
-    /**
-     * @dev Returns an array of token IDs owned by `owner`,
-     * in the range [`start`, `stop`)
-     * (i.e. `start <= tokenId < stop`).
-     *
-     * This function allows for tokens to be queried if the collection
-     * grows too big for a single call of {ERC721AQueryable-tokensOfOwner}.
-     *
-     * Requirements:
-     *
-     * - `start < stop`
-     */
-    function tokensOfOwnerIn(
-        address owner,
-        uint256 start,
-        uint256 stop
-    ) external view virtual override returns (uint256[] memory) {
-        unchecked {
-            if (start >= stop) revert InvalidQueryRange();
-            uint256 tokenIdsIdx;
-            uint256 stopLimit = _nextTokenId();
-            // Set `start = max(start, _startTokenId())`.
-            if (start < _startTokenId()) {
-                start = _startTokenId();
-            }
-            // Set `stop = min(stop, stopLimit)`.
-            if (stop > stopLimit) {
-                stop = stopLimit;
-            }
-            uint256 tokenIdsMaxLength = balanceOf(owner);
-            // Set `tokenIdsMaxLength = min(balanceOf(owner), stop - start)`,
-            // to cater for cases where `balanceOf(owner)` is too big.
-            if (start < stop) {
-                uint256 rangeLength = stop - start;
-                if (rangeLength < tokenIdsMaxLength) {
-                    tokenIdsMaxLength = rangeLength;
-                }
-            } else {
-                tokenIdsMaxLength = 0;
-            }
-            uint256[] memory tokenIds = new uint256[](tokenIdsMaxLength);
-            if (tokenIdsMaxLength == 0) {
-                return tokenIds;
-            }
-            // We need to call `explicitOwnershipOf(start)`,
-            // because the slot at `start` may not be initialized.
-            TokenOwnership memory ownership = explicitOwnershipOf(start);
-            address currOwnershipAddr;
-            // If the starting slot exists (i.e. not burned), initialize `currOwnershipAddr`.
-            // `ownership.address` will not be zero, as `start` is clamped to the valid token ID range.
-            if (!ownership.burned) {
-                currOwnershipAddr = ownership.addr;
-            }
-            for (uint256 i = start; i != stop && tokenIdsIdx != tokenIdsMaxLength; ++i) {
-                ownership = _ownershipAt(i);
-                if (ownership.burned) {
-                    continue;
-                }
-                if (ownership.addr != address(0)) {
-                    currOwnershipAddr = ownership.addr;
-                }
-                if (currOwnershipAddr == owner) {
-                    tokenIds[tokenIdsIdx++] = i;
-                }
-            }
-            // Downsize the array to fit.
-            assembly {
-                mstore(tokenIds, tokenIdsIdx)
-            }
-            return tokenIds;
-        }
-    }
-
-    /**
-     * @dev Returns an array of token IDs owned by `owner`.
-     *
-     * This function scans the ownership mapping and is O(`totalSupply`) in complexity.
-     * It is meant to be called off-chain.
-     *
-     * See {ERC721AQueryable-tokensOfOwnerIn} for splitting the scan into
-     * multiple smaller scans if the collection is large enough to cause
-     * an out-of-gas error (10K collections should be fine).
-     */
-    function tokensOfOwner(address owner) external view virtual override returns (uint256[] memory) {
-        unchecked {
-            uint256 tokenIdsIdx;
-            address currOwnershipAddr;
-            uint256 tokenIdsLength = balanceOf(owner);
-            uint256[] memory tokenIds = new uint256[](tokenIdsLength);
-            TokenOwnership memory ownership;
-            for (uint256 i = _startTokenId(); tokenIdsIdx != tokenIdsLength; ++i) {
-                ownership = _ownershipAt(i);
-                if (ownership.burned) {
-                    continue;
-                }
-                if (ownership.addr != address(0)) {
-                    currOwnershipAddr = ownership.addr;
-                }
-                if (currOwnershipAddr == owner) {
-                    tokenIds[tokenIdsIdx++] = i;
-                }
-            }
-            return tokenIds;
-        }
+    function _msgData() internal view virtual returns (bytes calldata) {
+        return msg.data;
     }
 }
 
-// File: contracts/SDX.sol
+// File: @openzeppelin/contracts/access/Ownable.sol
 
 
-pragma solidity 0.8.17;
+// OpenZeppelin Contracts (last updated v4.7.0) (access/Ownable.sol)
+
+pragma solidity ^0.8.0;
+
+
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * By default, the owner account will be the one that deploys the contract. This
+ * can later be changed with {transferOwnership}.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
+ */
+abstract contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor() {
+        _transferOwnership(_msgSender());
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        _checkOwner();
+        _;
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if the sender is not the owner.
+     */
+    function _checkOwner() internal view virtual {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+    }
+
+    /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby removing any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public virtual onlyOwner {
+        _transferOwnership(address(0));
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Internal function without access restriction.
+     */
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+}
+
+// File: topostation/seatreasure.sol
+
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 
 
 
 
 
-contract SupremeDogsX is ERC721AQueryable, Ownable {
-  using Strings for uint256;
-  using Counters for Counters.Counter;
 
-  Counters.Counter private supply;
 
-  string public uriPrefix = "https://www.supremebonesx.io/sdx/nft/json/";
-  string public uriSuffix = ".json";
-  string public _contractURI = "";
-  string public hiddenMetadataUri;
 
-  uint256 public maxSupply = 2500;
-  uint256 public maxMintAmountPerTx = 2500;
-  uint256 public walletLimit = 2500;
+contract MerkleWhitelist is Ownable {
+  bytes32 public wl1WhitelistMerkleRoot = 0xc28125c46bdb7acf8f3408920e54426cc2e65a9490271f246fbba7b828ee9f66;
 
-  bool public paused = true;
-  bool public revealed = false;
-
-  uint256 public whitelistPhase = 0;
-
-  uint256 public whitelistCost = 25000000000000000;
-  uint256 public publicCost = 35000000000000000;
-
-  uint256 public baseRefReward = 35000000000000000;
-
-  mapping (address => uint256) public alreadyMinted;
-  mapping (address => uint256) public refMints;
-  mapping (address => uint256) public claimedRefMints;
-
-// MERKEL TREE STUFF
-  bytes32 public merkleRoot = 0x59f37e56fcc6db04ef14c37393808782f92269ddf3a082629bbe02c2eeba7172;
-
-  bytes32 public refMerkleRoot = 0x59f37e56fcc6db04ef14c37393808782f92269ddf3a082629bbe02c2eeba7172;
-  
-  constructor() ERC721A("Supreme Dogs X", "SDX") {
-    _startTokenId();
-    setHiddenMetadataUri("https://www.supremebonesx.com/sdx/hiddenMeta.json");
-    setContractURI("https://www.supremebonesx.com/sdx/sdxContract.json");
+  function _verifyWl1Sender(bytes32[] memory proof) internal view returns (bool) {
+    return _verify(proof, _hash(msg.sender), wl1WhitelistMerkleRoot);
   }
 
-  function _startTokenId()
-        internal
-        pure
-        override
-        returns(uint256)
-    {
-        return 1;
-    }
-
-  modifier mintCompliance (uint256 _mintAmount) 
+  function _verify(bytes32[] memory proof, bytes32 addressHash, bytes32 whitelistMerkleRoot)
+    internal
+    pure
+    returns (bool)
   {
-    require(!paused, "Minting is PAUSED!");
-    require(_mintAmount > 0 && _mintAmount <= maxMintAmountPerTx, "Invalid mint amount!");
-    require(msg.sender == tx.origin, "No Bots!");
-    require(totalSupply() + _mintAmount <= maxSupply, "Max supply exceeded!");
-    require(alreadyMinted[msg.sender] + _mintAmount <= walletLimit, "Max Mints Per Wallet Reached!");
+    return MerkleProof.verify(proof, whitelistMerkleRoot, addressHash);
+  }
+
+  function _hash(address _address) internal pure returns (bytes32) {
+    return keccak256(abi.encodePacked(_address));
+  }
+
+
+  function setWl1WhitelistMerkleRoot(bytes32 merkleRoot) external onlyOwner {
+    wl1WhitelistMerkleRoot = merkleRoot;
+  }
+
+
+  /*
+  MODIFIER
+  */
+ modifier onlyWl1Whitelist(bytes32[] memory proof) {
+    require(_verifyWl1Sender(proof), "MerkleWhitelist: Caller is not whitelisted");
     _;
   }
+ 
 
-  function setMerkleRoot(bytes32 newMerkleRoot) external onlyOwner
-  {
-    merkleRoot = newMerkleRoot;
-  }
+}
 
-  function setRefMerkleRoot(bytes32 newRefMerkleRoot) external onlyOwner
-  {
-      refMerkleRoot = newRefMerkleRoot;
-  }
 
-  function setWalletLimit(uint256 _walletLimit) external onlyOwner
-  {
-      walletLimit = _walletLimit;
-  }
+contract topostation is Ownable, ERC721A, ReentrancyGuard,MerkleWhitelist {
+     using SafeMath for uint256;
+   
+    uint256 public maxSupply = 222;
+    uint256 public AMOUNT = 100;
 
-  function setWhitelistMintCost(uint256 _mintCost) external onlyOwner
-  {
-      whitelistCost = _mintCost;
-  }
+    uint256 public PRICE = 0.01 ether;
 
-  function setPublicMintCost(uint256 _mintCost) external onlyOwner
-  {
-      publicCost = _mintCost;
-  }
+    uint256 public LIMIT = 10;
 
-  function setBaseRefReward(uint256 _baseRefReward) external onlyOwner
-  {
-    baseRefReward = _baseRefReward;
-  }
-
-  function getAlreadyMinted(address a) public view returns (uint256)
-  {
-    return alreadyMinted[a];
-  }
-
-  function getWhitelistState() public view returns (uint256)
-  {
-    return whitelistPhase;
-  }
-
-  function getPausedState() public view returns (bool)
-  {
-    return paused;
-  }
-
-  function getTotalSupply() public view returns (uint256)
-  {
-    return totalSupply();
-  }
-
-  function getTotalRefMints(address addy) public view returns (uint256)
-  {
-      return refMints[addy];
-  }
-
-  function getClaimedRefMints(address addy) public view returns (uint256)
-  {
-      return claimedRefMints[addy];
-  }
-
-  function whitelistMint(bytes32[] calldata _merkleProof, uint256 _mintAmount, address refCode) external mintCompliance(_mintAmount) payable
-  {
-    bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
-
-    require(MerkleProof.verify(_merkleProof, merkleRoot, leaf), "Not on the Whitelist");
-    require(msg.value >= _mintAmount * whitelistCost, "Insufficient funds!");
-
-    alreadyMinted[msg.sender] += _mintAmount;
-    _safeMint(msg.sender, _mintAmount);
-
-    if (msg.sender != refCode)
-    {
-      refMints[refCode] += _mintAmount;
-    }
-  }
-
-  function publicMint(uint256 _mintAmount, address refCode) external mintCompliance(_mintAmount) payable
-  {
-    require(msg.value >= _mintAmount * publicCost, "Insufficient funds!");
-
-    alreadyMinted[msg.sender] += _mintAmount;
-    _safeMint(msg.sender, _mintAmount);
-
-    if (msg.sender != refCode)
-    {
-      refMints[refCode] += _mintAmount;
-    }
+    bool _isActive = true;
     
-  }
+    string public BASE_URI="https://ternahet.s3.filebase.com/123/";
+    string public CONTRACT_URI ="https://ternahet.s3.filebase.com/os2.json";
 
-  function publicMintNoRef(uint256 _mintAmount) external mintCompliance(_mintAmount) payable
-  {
-    require(msg.value >= _mintAmount * publicCost, "Insufficient funds!");
+    struct Info {
+        uint256 all_amount;
+        uint256 minted;
+        uint256 price;
+        uint256 start_time;
+        uint256 numberMinted;
+        uint256 limit;
+        uint256 amount;
+        bool isActive;
+    }
 
-    alreadyMinted[msg.sender] += _mintAmount;
-    _safeMint(msg.sender, _mintAmount);
-  }
 
-  function claimRefRewards(bytes32[] calldata _refMerkleProof) public
-  {
-      bytes32 refLeaf = keccak256(abi.encodePacked(msg.sender));
-      uint256 rewPerMint;
+    constructor() ERC721A("Sea Treasure", "STR") {
+        _safeMint(msg.sender, 1);
+    }  
+    
+    function info(address user) public view returns (Info memory) {
+        return  Info(maxSupply,totalSupply(),PRICE,0,_numberMinted(user),LIMIT,AMOUNT,_isActive);
+    }
 
-      if (MerkleProof.verify(_refMerkleProof, refMerkleRoot, refLeaf))
-      {
-        rewPerMint = baseRefReward/100*5;
-      }
-      else
-      {
-        rewPerMint = baseRefReward/100*3;
-      }
 
-      uint256 rewardingMints = refMints[msg.sender] - claimedRefMints[msg.sender];
-      uint256 reward = rewardingMints * rewPerMint;
-      claimedRefMints[msg.sender] = refMints[msg.sender];
-      payable(msg.sender).transfer(reward);
-  }
+    function mint(uint256 amount,bytes32[] memory proof) external payable onlyWl1Whitelist(proof){
+        require(msg.sender == tx.origin, "Cannot mint from contract");
+        require(_isActive, "must be active to mint tokens");
+        require(amount > 0, "amount must be greater than 0");
+        require(totalSupply().add(amount) <= AMOUNT, "Max supply for mint reached!");
+        require(totalSupply().add(amount) <= maxSupply, "max supply would be exceeded");
 
-  function claimRefRewardsPublic() public
-  {
-      uint256 rewPerMint;
-      rewPerMint = baseRefReward/100*3;
+        uint minted = _numberMinted(msg.sender);
+        require(minted.add(amount) <= LIMIT, "max mint per wallet would be exceeded");
+        
+        require(msg.value >= PRICE * amount, "value not met");
+        _safeMint(msg.sender, amount);
+    }
 
-      uint256 rewardingMints = refMints[msg.sender] - claimedRefMints[msg.sender];
-      uint256 reward = rewardingMints * rewPerMint;
-      claimedRefMints[msg.sender] = refMints[msg.sender];
-      payable(msg.sender).transfer(reward);
-  }
+   function withdraw() public onlyOwner nonReentrant {
+        (bool succ, ) = payable(owner()).call{value: address(this).balance}('');
+        require(succ, "transfer failed");
+   }
 
-  function mintForAddress(uint256 _mintAmount, address _receiver) public payable onlyOwner {
-    require(totalSupply() + _mintAmount <= maxSupply, "Max supply exceeded!");
-    _safeMint(_receiver, _mintAmount);
-  }
+    function setBaseURI(string memory _baseURI) public onlyOwner {
+        BASE_URI = _baseURI;
+    }
 
-  function mintForAddressMultiple(address[] calldata addresses, uint256[] calldata amount) public onlyOwner
-  {
-    for (uint256 i; i < addresses.length; i++)
+
+    function contractURI() public view returns (string memory) {
+        return CONTRACT_URI;
+    }
+
+    function setContractURI(string memory _contractURI) public onlyOwner {
+        CONTRACT_URI = _contractURI;
+    }
+
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
     {
-      require(totalSupply() + amount[i] <= maxSupply, "Max supply exceeded!");
-      _safeMint(addresses[i], amount[i]);
-    }
-  }
-
-  function walletOfOwner(address _owner)
-    public
-    view
-    returns (uint256[] memory)
-  {
-    uint256 ownerTokenCount = balanceOf(_owner);
-    uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
-    uint256 currentTokenId = 1;
-    uint256 ownedTokenIndex = 0;
-
-    while (ownedTokenIndex < ownerTokenCount && currentTokenId <= maxSupply) {
-      address currentTokenOwner = ownerOf(currentTokenId);
-
-      if (currentTokenOwner == _owner) {
-        ownedTokenIds[ownedTokenIndex] = currentTokenId;
-
-        ownedTokenIndex++;
-      }
-
-      currentTokenId++;
+        return string(abi.encodePacked(BASE_URI, Strings.toString(_tokenId), ".json"));
     }
 
-    return ownedTokenIds;
-  }
-
-  function tokenURI(uint256 _tokenId)
-    public
-    view
-    virtual
-    override (ERC721A, IERC721A)
-    returns (string memory)
-  {
-    require(
-      _exists(_tokenId),
-      "ERC721Metadata: URI query for nonexistent token"
-    );
-
-    if (revealed == false) {
-      return hiddenMetadataUri;
+    function flipState(bool isActive) external onlyOwner {
+        _isActive = isActive;
     }
 
-    string memory currentBaseURI = _baseURI();
-    return bytes(currentBaseURI).length > 0
-        ? string(abi.encodePacked(currentBaseURI, _toString(_tokenId), uriSuffix))
-        : "";
-  }
+    function setPrice(uint256 price) public onlyOwner
+    {
+        PRICE = price;
+    }
 
-  function contractURI() 
-  public 
-  view 
-  returns (string memory) 
-  {
-        return bytes(_contractURI).length > 0
-          ? string(abi.encodePacked(_contractURI))
-          : "";
-  }
+    function setAmount(uint256 amount) public onlyOwner
+    {
+        AMOUNT = amount;
+    }
 
-  function setRevealed(bool _state) public onlyOwner {
-    revealed = _state;
-  }
+    function setLimit(uint256 limit) public onlyOwner
+    {
+        LIMIT = limit;
+    }
 
-  function setMaxMintAmountPerTx(uint256 _maxMintAmountPerTx) public onlyOwner {
-    maxMintAmountPerTx = _maxMintAmountPerTx;
-  }
 
-  function setHiddenMetadataUri(string memory _hiddenMetadataUri) public onlyOwner {
-    hiddenMetadataUri = _hiddenMetadataUri;
-  }
-
-  function setUriPrefix(string memory _uriPrefix) public onlyOwner {
-    uriPrefix = _uriPrefix;
-  }
-
-  function setUriSuffix(string memory _uriSuffix) public onlyOwner {
-    uriSuffix = _uriSuffix;
-  }
-
-  function setContractURI(string memory newContractURI) public onlyOwner {
-    _contractURI = newContractURI;
-  }
-
-  function setPaused(bool _state) public onlyOwner {
-    paused = _state;
-  }
-
-  function setWhitelistPhase(uint256 _state) public onlyOwner {
-    whitelistPhase = _state;
-  }
-
-  function withdraw(uint256 amount) public onlyOwner 
-  {
-    payable(msg.sender).transfer(amount);
-  }
-
-  function withdrawAll() public onlyOwner {
-    (bool os, ) = payable(owner()).call{value: address(this).balance}("");
-    require(os);
-  }
-
-  function _baseURI() internal view virtual override returns (string memory) {
-    return uriPrefix;
-  }
 
 }
