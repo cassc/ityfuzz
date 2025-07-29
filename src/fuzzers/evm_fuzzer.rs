@@ -105,6 +105,11 @@ pub fn evm_fuzzer(
 ) {
     println!("\n\n ================ EVM Fuzzer Start ===================\n\n");
 
+    info!(
+        "Ityfuzz start at {}",
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
+    );
+
     // create work dir if not exists
     let path = Path::new(config.work_dir.as_str());
     if !path.exists() {

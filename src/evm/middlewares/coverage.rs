@@ -178,6 +178,15 @@ impl CoverageReport {
                 (cov.instruction_coverage * 100) as f64 / cov.total_instructions as f64,
                 (cov.branch_coverage * 100) as f64 / cov.total_branches as f64
             );
+            info!(
+                "Coverage stat: time-millis: {} instructions: {}/{} branches: {}/{}, address: {}",
+                SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
+                cov.instruction_coverage,
+                cov.total_instructions,
+                cov.branch_coverage,
+                cov.total_branches,
+                addr
+            );
         }
     }
 }
@@ -224,7 +233,7 @@ impl Coverage {
                     let mut real_covered: HashSet<usize> = covered.difference(skip_pcs).cloned().collect();
                     let uncovered_pc = all_pcs.difference(&real_covered).cloned().collect_vec();
                     report.coverage.insert(name.clone(), CoverageResult {
-                        instruction_coverage: real_covered.len(),
+                        instruction_coverage: covered.len(),
                         total_instructions: all_pcs.len(),
                         branch_coverage: 0,
                         total_branches: 0,
