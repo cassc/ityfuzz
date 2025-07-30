@@ -105,7 +105,10 @@ pub fn evm_fuzzer(
 ) {
     println!("\n\n ================ EVM Fuzzer Start ===================\n\n");
 
-    info!(
+    use std::time::UNIX_EPOCH;
+    use std::time::SystemTime;
+
+    println!(
         "Ityfuzz start at {}",
         SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
     );

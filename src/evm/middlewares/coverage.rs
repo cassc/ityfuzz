@@ -178,7 +178,7 @@ impl CoverageReport {
                 (cov.instruction_coverage * 100) as f64 / cov.total_instructions as f64,
                 (cov.branch_coverage * 100) as f64 / cov.total_branches as f64
             );
-            info!(
+            println!(
                 "Coverage stat: time-millis: {} instructions: {}/{} branches: {}/{}, address: {}",
                 SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
                 cov.instruction_coverage,
