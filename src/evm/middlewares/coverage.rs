@@ -156,12 +156,13 @@ impl CoverageReport {
             .append(false)
             .create(true)
             .truncate(true)
-            .open(format!("{}/coverage.json", work_dir))
+            .open(format!("{}/coverage.json", work_dir.clone()))
             .unwrap();
         json_file
             .write_all(serde_json::to_string(self).unwrap().as_bytes())
             .unwrap();
         json_file.flush().unwrap();
+
 
         // write succint json file
         let succint_cov_map = self.succint();
@@ -258,6 +259,26 @@ impl Coverage {
                     let real_covered: HashSet<usize> = covered.difference(skip_pcs).cloned().collect();
                     // let uncovered: Vec<usize> =
                     // all_pcs.difference(&real_covered).cloned().collect_vec();
+                    
+                    // Write covered PCs to CSV file
+                    let csv_path = format!("{}/{:?}.coverage.csv", self.work_dir, addr);
+                    let mut csv_file = OpenOptions::new()
+                        .write(true)
+                        .create(true)
+                        .truncate(true)
+                        .open(&csv_path)
+                        .unwrap();
+                    
+                    // Write header
+                    writeln!(csv_file, "pc").unwrap();
+                    
+                    // Write covered PCs, sorted
+                    let mut covered_pcs: Vec<_> = covered.iter().cloned().collect();
+                    covered_pcs.sort();
+                    for pc in covered_pcs {
+                        writeln!(csv_file, "{}", pc).unwrap();
+                    }
+                    csv_file.flush().unwrap();
                     report.coverage.insert(
                         name.clone(),
                         CoverageResult {
